@@ -16,7 +16,49 @@
 
 ///// Student Code
 
+// Funktion zum Einlesen und Überprüfen eines Ganzzahlwertes im angegebenen Bereich
+int gibIntWert(const char *prompt, int min, int max) {
+    int value;
+    while (1) {
+        printf("%s (%d - %d): ", prompt, min, max);
+        if (scanf("%d", &value) == 1 && value >= min && value <= max) {
+            break;
+        }
+        printf("Ungültige Eingabe. Bitte wiederholen.\n");
+    }
+    return value;
+}
 
+// Funktion, um zu prüfen, ob ein Jahr ein Schaltjahr ist
+int istSchaltjahr(int jahr) {
+    if ((jahr % 4 == 0 && jahr % 100 != 0) || (jahr % 400 == 0)) {
+        return 1;
+    }
+    return 0;
+}
+
+// Funktion, um die Anzahl der Tage im angegebenen Monat und Jahr zu berechnen
+int tageProMonat(int jahr, int monat) {
+    switch (monat) {
+        case 1:  // Januar
+        case 3:  // März
+        case 5:  // Mai
+        case 7:  // Juli
+        case 8:  // August
+        case 10: // Oktober
+        case 12: // Dezember
+            return 31;
+        case 4:  // April
+        case 6:  // Juni
+        case 9:  // September
+        case 11: // November
+            return 30;
+        case 2:  // Februar
+            return istSchaltjahr(jahr) ? 29 : 28;
+        default:
+            return 0; // Ungültiger Monat
+    }
+}
 
 ///// END Student Code
 
