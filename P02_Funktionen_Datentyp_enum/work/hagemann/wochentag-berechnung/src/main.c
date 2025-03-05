@@ -93,7 +93,7 @@ int getMonthLength(date_t date) {
 // BEGIN-STUDENTS-TO-ADD-CODE
 
 int isGregorianDate(date_t date) {
-    return (date.year >= 1582 && date.year <= 9999); // Gültiger gregorianischer Bereich
+    return (date.year > 1582 && date.year <= 9999) || (date.year == 1582 && (date.month > 10 || (date.month == 10 && date.day >= 15)));
 }
 
 // END-STUDENTS-TO-ADD-CODE
