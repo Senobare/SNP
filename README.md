@@ -1,3 +1,15 @@
+![Alt-Text](./Motivation.png)
+
+
+
+
+
+
+
+
+
+---
+
 # SNP - Praktika
 <img align="right" title="zhaw.ch" width="176" height="92" src="en-zhaw-ines-rgb.png">
 
