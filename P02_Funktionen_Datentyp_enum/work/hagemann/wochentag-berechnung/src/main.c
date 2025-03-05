@@ -19,6 +19,8 @@
 // *** TASK1: typedef enum types for month_t (Jan=1,...Dec} ***
 // BEGIN-STUDENTS-TO-ADD-CODE
 
+ // wird immer um 1 inkrementiert wenn 2 hintereinander sind ohne nummer beim zweiten. Also wenn Apr=14 dann wäre May=15.
+ // Könnte auch für römische Zahlen angewendet werden, wo man bei jedem Enum-Wert einen Int definiert.
 typedef enum {
     Jan = 1, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
 } month_t;
@@ -144,7 +146,7 @@ weekday_t calculateWeekday(date_t date) {
 void printWeekday(weekday_t day) {
     const char *weekdays[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
     if (day >= Sun && day <= Sat) {
-        printf("%s", weekdays[day]);
+        (void) printf("%s", weekdays[day]);
     } else {
         assert(!"day is out-of-range");
     }
@@ -164,20 +166,20 @@ int main(int argc, const char *argv[])
     // BEGIN-STUDENTS-TO-ADD-CODE
 
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s YYYY-MM-DD\n", argv[0]);
+        (void) fprintf(stderr, "Usage: %s YYYY-MM-DD\n", argv[0]);
         return EXIT_FAILURE;
     }
 
     // Datum einlesen
     date_t date;
     if (sscanf(argv[1], "%d-%d-%d", &date.year, (int*)&date.month, &date.day) != 3) {
-        fprintf(stderr, "Invalid date format\n");
+        (void) fprintf(stderr, "Invalid date format\n");
         return EXIT_FAILURE;
     }
 
     // Überprüfen, ob das Datum gültig ist
     if (!isValidDate(date)) {
-        fprintf(stderr, "Invalid date\n");
+        (void) fprintf(stderr, "Invalid date\n");
         return EXIT_FAILURE;
     }
 
@@ -191,9 +193,9 @@ int main(int argc, const char *argv[])
     weekday_t weekday = calculateWeekday(date);
 
     // Ausgabe des Wochentags
-    printf("%04d-%02d-%02d is a ", date.year, date.month, date.day);
-    printWeekday(weekday);
-    printf("\n");
+    (void) printf("%04d-%02d-%02d is a ", date.year, date.month, date.day);
+    (void) printWeekday(weekday);
+    (void) printf("\n");
 
     // END-STUDENTS-TO-ADD-CODE
 

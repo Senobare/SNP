@@ -14,6 +14,9 @@
 #define ERROR_IN_MONTH 1
 #define ERROR_IN_YEAR 2
 
+#define TRUE 1
+#define FALSE 0
+
 ///// Student Code
 
 // Funktion zum Einlesen und Überprüfen eines Ganzzahlwertes im angegebenen Bereich
@@ -22,6 +25,7 @@ int gibIntWert(const char *prompt, int min, int max) {
     while (1) {
         printf("%s (%d - %d): ", prompt, min, max);
         if (scanf("%d", &value) == 1 && value >= min && value <= max) {
+          // fgets() sicherer Weg anstatt scnaf
             break;
         }
         printf("Ungültige Eingabe. Bitte wiederholen.\n");
@@ -32,9 +36,9 @@ int gibIntWert(const char *prompt, int min, int max) {
 // Funktion, um zu prüfen, ob ein Jahr ein Schaltjahr ist
 int istSchaltjahr(int jahr) {
     if ((jahr % 4 == 0 && jahr % 100 != 0) || (jahr % 400 == 0)) {
-        return 1;
+        return TRUE; // Magic numbers ersetzen durch eigene Symbole. Durch Symbole ersetzen, welche lesbar & sinnvoll sind
     }
-    return 0;
+    return FALSE;
 }
 
 // Funktion, um die Anzahl der Tage im angegebenen Monat und Jahr zu berechnen
@@ -72,13 +76,13 @@ int main (int argc, char *argv[]) {
     jahr  = gibIntWert("Jahr", 1600, 9999);
 	
     //  Ausgabe zum Test
-    printf("Monat: %d, Jahr: %d \n", monat, jahr);    
+    (void) printf("Monat: %d, Jahr: %d \n", monat, jahr);
     
     //  Ausgabe zum Test (hier mit dem ternaeren Operator "?:")
-    printf("%d ist %s Schaltjahr\n", jahr, istSchaltjahr(jahr) ? "ein" : "kein");
+    (void) printf("%d ist %s Schaltjahr\n", jahr, istSchaltjahr(jahr) ? "ein" : "kein");
 
     // Ausgabe
-    printf("Der Monat %02d-%d hat %d Tage.\n", monat, jahr, tageProMonat(jahr, monat));
+    (void) printf("Der Monat %02d-%d hat %d Tage.\n", monat, jahr, tageProMonat(jahr, monat));
    
     return 0;
 }
