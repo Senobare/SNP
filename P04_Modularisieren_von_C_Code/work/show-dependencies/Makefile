@@ -1,4 +1,6 @@
-SNP_SHARED_MAKEFILE := $(if $(SNP_SHARED_MAKEFILE),$(SNP_SHARED_MAKEFILE),~/snp/shared.mk)
+SNP_BASE_DIR := $(realpath $(CURDIR)/../../..)
+
+SNP_SHARED_MAKEFILE := $(if $(SNP_SHARED_MAKEFILE),$(SNP_SHARED_MAKEFILE),$(SNP_BASE_DIR)/shared.mk)
 
 TARGET     := bin/dep2dot
 # Add all additional c-files to the SOURCES variable

@@ -13,4 +13,17 @@
  */
 // begin students to add code for task 4.1
 
+#ifndef READ_H
+#define READ_H
+
+#include <stdbool.h>
+
+#define MAX_NUMBER 1000
+#define PARSE_ERROR -1
+#define READ_ERROR -2
+
+int getInt(int maxResult);
+
+#endif // READ_H
+
 // end students to add code

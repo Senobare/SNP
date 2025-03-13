@@ -1,6 +1,10 @@
-# minimal required settings
-SNP_TESTLIB   := $(if $(SNP_TESTLIB),$(SNP_TESTLIB),$(wildcard ~/snp/testlib))
-SNP_DOXYFILE  := $(if $(SNP_DOXYFILE),$(SNP_DOXYFILE),$(wildcard ~/snp/Doxyfile))
+# Verwenden den dynamisch generierten Pfad
+SNP_TESTLIB := $(if $(SNP_TESTLIB),$(SNP_TESTLIB),$(wildcard $(SNP_BASE_DIR)/testlib))
+SNP_DOXYFILE  := $(if $(SNP_DOXYFILE),$(SNP_DOXYFILE),$(wildcard $(SNP_BASE_DIR)/SNP/Doxyfile))
+
+# Debbuging
+$(info SNP_BASE_DIR_share = $(SNP_BASE_DIR))
+$(info SNP_TESTLIB = $(SNP_TESTLIB))
 
 # directories to create (and remove upon cleanup)
 CREATEDIRS    := bin doc
@@ -23,7 +27,7 @@ FULLTARGET    := $(CURDIR)/$(TARGET)
 CC            = gcc
 CFLAGS        = -std=c99 -Wall -pedantic -g
 CPPFLAGS      = -MD -Isrc -Itests -I$(TSTINCDIR) -DTARGET=$(FULLTARGET)
-LDFLAGS       = -static
+LDFLAGS       += -L/usr/lib
 
 # targets which get always visited (without checking any up-to-date state)
 .PHONY: default clean test doc install mkdir
