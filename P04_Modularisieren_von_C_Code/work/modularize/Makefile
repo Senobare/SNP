@@ -14,7 +14,7 @@ SOURCES := src/triangle.c src/read.c src/rectang.c
 TSTSOURCES := tests/tests.c
 
 # Libraries
-LIBS := -lm -lcunit
+LIBS := -lm -lcunit # this will point to /usr/lib/libcunit.so instead of searching for a static variant
 
 # Define the output binary
 OUTPUT := $(TARGET)
