@@ -14,7 +14,7 @@
  */
 static void print_node(file_t file)
 {
-	printf("\"%s (cluster_c%zd)\"", file.name, file.dir);
+	(void)printf("\"%s (cluster_c%zd)\"", file.name, file.dir);
 }
 
 /**
@@ -32,14 +32,22 @@ static size_t dependencies(file_t files[], size_t len, size_t curr)
 	assert(curr < len);
 	size_t level = files[curr].level;
 	size_t file = curr + 1;
-	while(file < len && files[file].level > level) {
-		if (files[file].level == level + 1) {
+	while (file < len && files[file].level > level)
+	{
+		if (files[file].level == level + 1)
+		{
 			// Write to stdout "  file -> include;\n" where file and include are the DOT node names of the respective files
 			// BEGIN-STUDENTS-TO-ADD-CODE
-
+			printf("  ");
+            print_node(files[curr]);
+            printf(" -> ");
+            print_node(files[file]);
+            printf(";\n");
 			// END-STUDENTS-TO-ADD-CODE
 			file = dependencies(files, len, file);
-		} else {
+		}
+		else
+		{
 			file++;
 		}
 	}
@@ -51,35 +59,44 @@ static size_t dependencies(file_t files[], size_t len, size_t curr)
  */
 void output_dot(const data_t data)
 {
-	printf("digraph dep {\n");
+	(void)printf("digraph dep {\n");
 	// nodes
-	printf("  node [shape=box]\n");
-	for (size_t file = 0; file < data.n_files; file++) {
+	(void)printf("  node [shape=box]\n");
+	for (size_t file = 0; file < data.n_files; file++)
+	{
 		// Write to stdout "  file [label=\"name\"];\n" where file is the DOT node name and name is the file name
 		// BEGIN-STUDENTS-TO-ADD-CODE
+		(void)printf("  ");
+		print_node(data.files[file]);
+		(void)printf(" [label=\"%s\"];\n", data.files[file].name);
 		// END-STUDENTS-TO-ADD-CODE
 	}
 	// directory clusters
-	for (size_t dir = 0; dir < data.n_dirs; dir++) {
-		printf("  subgraph cluster_c%zd {\n", dir);
-		printf("    label=\"%s\"; %s\n", data.dirs[dir].name, strncmp(data.dirs[dir].name, "/usr/", 5) == 0 ? "style=filled; color=lightgrey;" : "color=black;");
-		for (size_t file = 0; file < data.n_files; file++) {
-			if (data.files[file].dir == dir) {
+	for (size_t dir = 0; dir < data.n_dirs; dir++)
+	{
+		(void)printf("  subgraph cluster_c%zd {\n", dir);
+		(void)printf("    label=\"%s\"; %s\n", data.dirs[dir].name, strncmp(data.dirs[dir].name, "/usr/", 5) == 0 ? "style=filled; color=lightgrey;" : "color=black;");
+		for (size_t file = 0; file < data.n_files; file++)
+		{
+			if (data.files[file].dir == dir)
+			{
 				// Write to stdout "    file;\n" where file is the DOT node name
 				// BEGIN-STUDENTS-TO-ADD-CODE
+				(void)printf("    ");
+				print_node(data.files[file]);
+				(void)printf(";\n");
 				// END-STUDENTS-TO-ADD-CODE
 			}
 		}
-		printf("  }\n");
+		(void)printf("  }\n");
 	}
-	
+
 	// dependencies
 	size_t curr = 0;
-	do {
+	do
+	{
 		curr = dependencies(data.files, data.n_files, curr);
-	} while(curr < data.n_files);
-	
-	printf("}\n");
+	} while (curr < data.n_files);
+
+	(void)printf("}\n");
 }
-
-
