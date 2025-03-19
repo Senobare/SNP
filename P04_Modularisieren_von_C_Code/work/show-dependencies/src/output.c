@@ -14,7 +14,7 @@
  */
 static void print_node(file_t file)
 {
-	(void)printf("\"%s (cluster_c%zd)\"", file.name, file.dir);
+	(void)(void) printf("\"%s (cluster_c%zd)\"", file.name, file.dir);
 }
 
 /**
@@ -38,11 +38,11 @@ static size_t dependencies(file_t files[], size_t len, size_t curr)
 		{
 			// Write to stdout "  file -> include;\n" where file and include are the DOT node names of the respective files
 			// BEGIN-STUDENTS-TO-ADD-CODE
-			printf("  ");
+			(void) printf("  ");
             print_node(files[curr]);
-            printf(" -> ");
+            (void) printf(" -> ");
             print_node(files[file]);
-            printf(";\n");
+            (void) printf(";\n");
 			// END-STUDENTS-TO-ADD-CODE
 			file = dependencies(files, len, file);
 		}
@@ -59,36 +59,36 @@ static size_t dependencies(file_t files[], size_t len, size_t curr)
  */
 void output_dot(const data_t data)
 {
-	(void)printf("digraph dep {\n");
+	(void)(void) printf("digraph dep {\n");
 	// nodes
-	(void)printf("  node [shape=box]\n");
+	(void)(void) printf("  node [shape=box]\n");
 	for (size_t file = 0; file < data.n_files; file++)
 	{
 		// Write to stdout "  file [label=\"name\"];\n" where file is the DOT node name and name is the file name
 		// BEGIN-STUDENTS-TO-ADD-CODE
-		(void)printf("  ");
+		(void) printf("  ");
 		print_node(data.files[file]);
-		(void)printf(" [label=\"%s\"];\n", data.files[file].name);
+		(void) printf(" [label=\"%s\"];\n", data.files[file].name);
 		// END-STUDENTS-TO-ADD-CODE
 	}
 	// directory clusters
 	for (size_t dir = 0; dir < data.n_dirs; dir++)
 	{
-		(void)printf("  subgraph cluster_c%zd {\n", dir);
-		(void)printf("    label=\"%s\"; %s\n", data.dirs[dir].name, strncmp(data.dirs[dir].name, "/usr/", 5) == 0 ? "style=filled; color=lightgrey;" : "color=black;");
+		(void) printf("  subgraph cluster_c%zd {\n", dir);
+		(void) printf("    label=\"%s\"; %s\n", data.dirs[dir].name, strncmp(data.dirs[dir].name, "/usr/", 5) == 0 ? "style=filled; color=lightgrey;" : "color=black;");
 		for (size_t file = 0; file < data.n_files; file++)
 		{
 			if (data.files[file].dir == dir)
 			{
 				// Write to stdout "    file;\n" where file is the DOT node name
 				// BEGIN-STUDENTS-TO-ADD-CODE
-				(void)printf("    ");
+				(void) printf("    ");
 				print_node(data.files[file]);
-				(void)printf(";\n");
+				(void) printf(";\n");
 				// END-STUDENTS-TO-ADD-CODE
 			}
 		}
-		(void)printf("  }\n");
+		(void) printf("  }\n");
 	}
 
 	// dependencies
@@ -98,5 +98,5 @@ void output_dot(const data_t data)
 		curr = dependencies(data.files, data.n_files, curr);
 	} while (curr < data.n_files);
 
-	(void)printf("}\n");
+	(void) printf("}\n");
 }

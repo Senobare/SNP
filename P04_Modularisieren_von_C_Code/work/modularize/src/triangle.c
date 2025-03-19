@@ -29,7 +29,7 @@ int main(void)
 
 	while (1)
 	{
-		printf("\nDreiecksbestimmung (CTRL-C: Abbruch)\n\n");
+		(void) printf("\nDreiecksbestimmung (CTRL-C: Abbruch)\n\n");
 
 		int word = 0;
 		int a = 0, b = 0, c = 0;
@@ -37,13 +37,13 @@ int main(void)
 		// Eingabe für a
 		do
 		{
-			printf("Seite a: ");
+			(void) printf("Seite a: ");
 			word = getInt(MAX_NUMBER);
 		} while (word == PARSE_ERROR); // Wiederhole bei Parse-Fehler
 
 		if (word == READ_ERROR)
 		{
-			printf("\n\nbye bye\n\n"); // Zwei Zeilenumbrüche vor und nach "bye bye"
+			(void) printf("\n\nbye bye\n\n"); // Zwei Zeilenumbrüche vor und nach "bye bye"
 			break;
 		}
 		a = word;
@@ -51,13 +51,13 @@ int main(void)
 		// Eingabe für b (analog zu a)
 		do
 		{
-			printf("Seite b: ");
+			(void) printf("Seite b: ");
 			word = getInt(MAX_NUMBER);
 		} while (word == PARSE_ERROR);
 
 		if (word == READ_ERROR)
 		{
-			printf("\n\nbye bye\n\n"); // Zwei Zeilenumbrüche vor und nach "bye bye"
+			(void) printf("\n\nbye bye\n\n"); // Zwei Zeilenumbrüche vor und nach "bye bye"
 			break;
 		}
 		b = word;
@@ -65,13 +65,13 @@ int main(void)
 		// Eingabe für c (analog zu a)
 		do
 		{
-			printf("Seite c: ");
+			(void) printf("Seite c: ");
 			word = getInt(MAX_NUMBER);
 		} while (word == PARSE_ERROR);
 
 		if (word == READ_ERROR)
 		{
-			printf("\n\nbye bye\n\n"); // Zwei Zeilenumbrüche vor und nach "bye bye"
+			(void) printf("\n\nbye bye\n\n"); // Zwei Zeilenumbrüche vor und nach "bye bye"
 			break;
 		}
 		c = word;
@@ -79,11 +79,11 @@ int main(void)
 		// Verarbeitung und Ausgabe des Ergebnisses
 		if (Rectangular(a, b, c))
 		{
-			printf("-> Dreieck %d-%d-%d ist rechtwinklig\n\n\n", a, b, c); // Drei Leerzeilen
+			(void) printf("-> Dreieck %d-%d-%d ist rechtwinklig\n\n\n", a, b, c); // Drei Leerzeilen
 		}
 		else
 		{
-			printf("-> Dreieck %d-%d-%d ist nicht rechtwinklig\n\n\n", a, b, c); // Drei Leerzeilen
+			(void) printf("-> Dreieck %d-%d-%d ist nicht rechtwinklig\n\n\n", a, b, c); // Drei Leerzeilen
 		}
 	}
 

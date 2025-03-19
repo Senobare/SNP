@@ -1,8 +1,6 @@
 # Dynamically set the base directory for SNP based on the current directory (CURDIR)
 SNP_BASE_DIR := $(realpath $(CURDIR)/../../..)
 
-$(info SNP_BASE_DIR = $(SNP_BASE_DIR))
-
 # Set the target (triangle executable)
 TARGET := bin/triangle
 

@@ -32,4 +32,4 @@ tests/tests.o: tests/tests.c /usr/include/stdc-predef.h \
  /usr/include/bits/setjmp.h \
  /usr/include/bits/types/struct___jmp_buf_tag.h \
  /usr/include/bits/types/__sigset_t.h /usr/include/CUnit/TestRun.h \
- /home/senobare/Developer/ZHAW/Sem4/SNP/testlib/include/test_utils.h
+ /home/senobare/Developer/SNP/testlib/include/test_utils.h
