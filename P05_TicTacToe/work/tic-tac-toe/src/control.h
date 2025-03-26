@@ -77,4 +77,14 @@ control_player_t control_get_state(control_t *instance, size_t cell);
  */
 control_line_t control_get_win(control_t *instance);
 
+/**
+ * @brief                   Queries if a move is possible.
+ * @param  instance [INOUT] The control instance
+ * @return                  Returns 1 if moves are possible, 0 if game is over
+ */
+int control_can_move(control_t *instance);
+
+/** my own function */
+void control_reset(control_t *instance);
+
 #endif // _CONTROL_H_

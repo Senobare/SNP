@@ -55,7 +55,7 @@ int main() {
 
     while (wordCount < MAX_WORDS) {
         (void) printf("Wort %d: ", wordCount + 1);
-        scanf("%19s", input); // Begrenzt die Eingabe auf 19 Zeichen + Nullterminator
+        (void) scanf("%19s", input); // Begrenzt die Eingabe auf 19 Zeichen + Nullterminator
 
         // Überprüfe auf Abbruchbedingung
         if (strcmp(input, "ZZZ") == 0) {
