@@ -242,7 +242,7 @@ static void notifier_loop(view_t *instance)
             break;
         default:
             if (isdigit(c))
-            { // Fixed: Added closing parenthesis
+            {
                 control_move(instance->control, c - '0');
             }
             break;
@@ -250,7 +250,7 @@ static void notifier_loop(view_t *instance)
 
         // Check if game ended naturally
         if (!control_can_move(instance->control))
-        { // Fixed: Added closing parenthesis
+        {
             show(instance);
             printf("\nGame over! Press 'r' to restart or '0' to exit\n");
             while (1)
