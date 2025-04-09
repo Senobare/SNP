@@ -18,6 +18,8 @@
 #include <assert.h>
 #include <CUnit/Basic.h>
 #include "test_utils.h"
+#include "person.h"
+#include "list.h"
 
 #ifndef TARGET // must be given by the make file --> see test target
 #error missing TARGET define
@@ -40,6 +42,7 @@ static int setup(void)
 {
     remove_file_if_exists(OUTFILE);
     remove_file_if_exists(ERRFILE);
+    clear_list(); // Clear list before each test
     return 0; // success
 }
 
@@ -53,81 +56,102 @@ static int teardown(void)
 // tests
 static void test_person_compare(void)
 {
-	// BEGIN-STUDENTS-TO-ADD-CODE
-	// arrange
-	person_t p1 = { .first_name = "Anna", .last_name = "Meier", .birth_year = 1990 };
-	person_t p2 = { .first_name = "Anna", .last_name = "Meier", .birth_year = 1990 };
-	person_t p3 = { .first_name = "Anna", .last_name = "Müller", .birth_year = 1990 };
+    // BEGIN-STUDENTS-TO-ADD-CODE
+    // arrange
+    person_t p1 = { .name = "Anna", .first_name = "Meier", .age = 1990 };
+    person_t p2 = { .name = "Anna", .first_name = "Meier", .age = 1990 };
+    person_t p3 = { .name = "Anna", .first_name = "Müller", .age = 1990 };
 
-	// act
-	// assert
-	CU_ASSERT(person_compare(&p1, &p2) == 0);
-	CU_ASSERT(person_compare(&p1, &p3) < 0);
-	CU_ASSERT(person_compare(&p3, &p1) > 0);
-	// END-STUDENTS-TO-ADD-CODE
+    // act
+    // assert
+    CU_ASSERT(person_compare(&p1, &p2) == 0);
+    CU_ASSERT(person_compare(&p1, &p3) < 0);
+    CU_ASSERT(person_compare(&p3, &p1) > 0);
+    // END-STUDENTS-TO-ADD-CODE
 }
 
 static void test_list_insert(void)
 {
-	// BEGIN-STUDENTS-TO-ADD-CODE
-	// arrange
-	list_t list;
-	list_init(&list);
-	person_t p1 = { .first_name = "Max", .last_name = "Muster", .birth_year = 1985 };
-	person_t p2 = { .first_name = "Lisa", .last_name = "Meier", .birth_year = 1992 };
+    // BEGIN-STUDENTS-TO-ADD-CODE
+    // arrange
+    person_t p1 = { .name = "Muster", .first_name = "Max", .age = 1985 };
+    person_t p2 = { .name = "Meier", .first_name = "Lisa", .age = 1992 };
 
-	// act
-	list_insert(&list, &p1);
-	list_insert(&list, &p2);
+    // act
+    bool result1 = insert_person(&p1);
+    bool result2 = insert_person(&p2);
 
-	// assert
-	CU_ASSERT_PTR_NOT_NULL(list.head);
-	CU_ASSERT_STRING_EQUAL(list.head->person.last_name, "Meier");
-	CU_ASSERT_PTR_NOT_NULL(list.head->next);
-	CU_ASSERT_STRING_EQUAL(list.head->next->person.last_name, "Muster");
-	CU_ASSERT_PTR_NULL(list.head->next->next);
-	// END-STUDENTS-TO-ADD-CODE
+    // assert
+    CU_ASSERT_TRUE(result1);
+    CU_ASSERT_TRUE(result2);
+    
+    // Verify list order (sorted by last name, then first name, then age)
+    node_t *current = anchor.next;
+    CU_ASSERT_PTR_NOT_EQUAL(current, &anchor);
+    CU_ASSERT_STRING_EQUAL(current->content.name, "Meier");
+    CU_ASSERT_STRING_EQUAL(current->content.first_name, "Lisa");
+    
+    current = current->next;
+    CU_ASSERT_PTR_NOT_EQUAL(current, &anchor);
+    CU_ASSERT_STRING_EQUAL(current->content.name, "Muster");
+    CU_ASSERT_STRING_EQUAL(current->content.first_name, "Max");
+    
+    current = current->next;
+    CU_ASSERT_PTR_EQUAL(current, &anchor); // Should be back to anchor
+    // END-STUDENTS-TO-ADD-CODE
 }
 
 static void test_list_remove(void)
 {
-	// BEGIN-STUDENTS-TO-ADD-CODE
-	// arrange
-	list_t list;
-	list_init(&list);
-	person_t p1 = { .first_name = "Anna", .last_name = "Ziegler", .birth_year = 1993 };
-	person_t p2 = { .first_name = "Ben", .last_name = "Huber", .birth_year = 1991 };
-	list_insert(&list, &p1);
-	list_insert(&list, &p2); // Huber, Ziegler
+    // BEGIN-STUDENTS-TO-ADD-CODE
+    // arrange
+    person_t p1 = { .name = "Ziegler", .first_name = "Anna", .age = 1993 };
+    person_t p2 = { .name = "Huber", .first_name = "Ben", .age = 1991 };
+    
+    // Clear any existing list entries
+    clear_list();
+    
+    // Insert test data (order matters for verification)
+    CU_ASSERT_TRUE(insert_person(&p1));
+    CU_ASSERT_TRUE(insert_person(&p2));
 
-	// act
-	int removed = list_remove(&list, "Huber");
+    // act - remove the second person
+    bool removed = remove_person(&p2);
 
-	// assert
-	CU_ASSERT_EQUAL(removed, 1);
-	CU_ASSERT_PTR_NOT_NULL(list.head);
-	CU_ASSERT_STRING_EQUAL(list.head->person.last_name, "Ziegler");
-	CU_ASSERT_PTR_NULL(list.head->next);
-	// END-STUDENTS-TO-ADD-CODE
+    // assert
+    CU_ASSERT_TRUE(removed);
+    
+    // Verify only Ziegler remains
+    node_t *current = anchor.next;
+    CU_ASSERT_PTR_NOT_EQUAL(current, &anchor);
+    
+    // Check the remaining person's details
+    if (current != &anchor) {
+        CU_ASSERT_STRING_EQUAL(current->content.name, "Ziegler");
+        CU_ASSERT_STRING_EQUAL(current->content.first_name, "Anna");
+        CU_ASSERT_EQUAL(current->content.age, 1993);
+        
+        // Verify it's the only remaining node
+        CU_ASSERT_PTR_EQUAL(current->next, &anchor);
+    }
+    // END-STUDENTS-TO-ADD-CODE
 }
 
 static void test_list_clear(void)
 {
-	// BEGIN-STUDENTS-TO-ADD-CODE
-	// arrange
-	list_t list;
-	list_init(&list);
-	person_t p1 = { .first_name = "Tim", .last_name = "Arnold", .birth_year = 1988 };
-	person_t p2 = { .first_name = "Sara", .last_name = "Keller", .birth_year = 1994 };
-	list_insert(&list, &p1);
-	list_insert(&list, &p2);
+    // BEGIN-STUDENTS-TO-ADD-CODE
+    // arrange
+    person_t p1 = { .name = "Arnold", .first_name = "Tim", .age = 1988 };
+    person_t p2 = { .name = "Keller", .first_name = "Sara", .age = 1994 };
+    insert_person(&p1);
+    insert_person(&p2);
 
-	// act
-	list_clear(&list);
+    // act
+    clear_list();
 
-	// assert
-	CU_ASSERT_PTR_NULL(list.head);
-	// END-STUDENTS-TO-ADD-CODE
+    // assert
+    CU_ASSERT_PTR_EQUAL(anchor.next, &anchor); // List should be empty
+    // END-STUDENTS-TO-ADD-CODE
 }
 
 /**
