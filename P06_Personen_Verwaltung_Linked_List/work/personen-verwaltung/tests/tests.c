@@ -55,12 +55,15 @@ static void test_person_compare(void)
 {
 	// BEGIN-STUDENTS-TO-ADD-CODE
 	// arrange
+	person_t p1 = { .first_name = "Anna", .last_name = "Meier", .birth_year = 1990 };
+	person_t p2 = { .first_name = "Anna", .last_name = "Meier", .birth_year = 1990 };
+	person_t p3 = { .first_name = "Anna", .last_name = "Müller", .birth_year = 1990 };
 
 	// act
-	CU_FAIL("missing test");
-	
 	// assert
-	
+	CU_ASSERT(person_compare(&p1, &p2) == 0);
+	CU_ASSERT(person_compare(&p1, &p3) < 0);
+	CU_ASSERT(person_compare(&p3, &p1) > 0);
 	// END-STUDENTS-TO-ADD-CODE
 }
 
@@ -68,12 +71,21 @@ static void test_list_insert(void)
 {
 	// BEGIN-STUDENTS-TO-ADD-CODE
 	// arrange
+	list_t list;
+	list_init(&list);
+	person_t p1 = { .first_name = "Max", .last_name = "Muster", .birth_year = 1985 };
+	person_t p2 = { .first_name = "Lisa", .last_name = "Meier", .birth_year = 1992 };
 
 	// act
-	CU_FAIL("missing test");
-	
+	list_insert(&list, &p1);
+	list_insert(&list, &p2);
+
 	// assert
-	
+	CU_ASSERT_PTR_NOT_NULL(list.head);
+	CU_ASSERT_STRING_EQUAL(list.head->person.last_name, "Meier");
+	CU_ASSERT_PTR_NOT_NULL(list.head->next);
+	CU_ASSERT_STRING_EQUAL(list.head->next->person.last_name, "Muster");
+	CU_ASSERT_PTR_NULL(list.head->next->next);
 	// END-STUDENTS-TO-ADD-CODE
 }
 
@@ -81,12 +93,21 @@ static void test_list_remove(void)
 {
 	// BEGIN-STUDENTS-TO-ADD-CODE
 	// arrange
+	list_t list;
+	list_init(&list);
+	person_t p1 = { .first_name = "Anna", .last_name = "Ziegler", .birth_year = 1993 };
+	person_t p2 = { .first_name = "Ben", .last_name = "Huber", .birth_year = 1991 };
+	list_insert(&list, &p1);
+	list_insert(&list, &p2); // Huber, Ziegler
 
 	// act
-	CU_FAIL("missing test");
-	
+	int removed = list_remove(&list, "Huber");
+
 	// assert
-	
+	CU_ASSERT_EQUAL(removed, 1);
+	CU_ASSERT_PTR_NOT_NULL(list.head);
+	CU_ASSERT_STRING_EQUAL(list.head->person.last_name, "Ziegler");
+	CU_ASSERT_PTR_NULL(list.head->next);
 	// END-STUDENTS-TO-ADD-CODE
 }
 
@@ -94,12 +115,18 @@ static void test_list_clear(void)
 {
 	// BEGIN-STUDENTS-TO-ADD-CODE
 	// arrange
+	list_t list;
+	list_init(&list);
+	person_t p1 = { .first_name = "Tim", .last_name = "Arnold", .birth_year = 1988 };
+	person_t p2 = { .first_name = "Sara", .last_name = "Keller", .birth_year = 1994 };
+	list_insert(&list, &p1);
+	list_insert(&list, &p2);
 
 	// act
-	CU_FAIL("missing test");
-	
+	list_clear(&list);
+
 	// assert
-	
+	CU_ASSERT_PTR_NULL(list.head);
 	// END-STUDENTS-TO-ADD-CODE
 }
 
