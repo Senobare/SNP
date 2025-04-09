@@ -35,17 +35,17 @@
 bool read_person(person_t *p) {
     char buffer[NAME_LEN * 2]; // Buffer für Namen
 
-    printf("First name: ");
+    (void) printf("First name: ");
     if (scanf("%19s", buffer) != 1) return false; // Vorname einlesen
     strncpy(p->first_name, buffer, NAME_LEN - 1);
     p->first_name[NAME_LEN - 1] = '\0';
 
-    printf("Last name: ");
+    (void) printf("Last name: ");
     if (scanf("%19s", buffer) != 1) return false; // Nachname einlesen
     strncpy(p->name, buffer, NAME_LEN - 1);
     p->name[NAME_LEN - 1] = '\0';
 
-    printf("Age: ");
+    (void) printf("Age: ");
     return scanf("%u", &p->age) == 1; // Alter einlesen
 }
 
@@ -60,31 +60,31 @@ int main(int argc, char* argv[]) {
     person_t p;   // Struktur zur Speicherung der eingegebenen Person
 
     while (1) {
-        printf("\nI(nsert), R(emove), S(how), C(lear), Q(uit): ");
+        (void) printf("\nI(nsert), R(emove), S(how), C(lear), Q(uit): ");
         scanf(" %c", &command); // Benutzereingabe einlesen
 
         switch (command) {
             case 'I': case 'i': // Einfügen
                 if (read_person(&p)) {
                     if (insert_person(&p)) {
-                        printf("Person added successfully.\n");
+                        (void) printf("Person added successfully.\n");
                     } else {
-                        printf("Failed to add person.\n");
+                        (void) printf("Failed to add person.\n");
                     }
                 } else {
-                    printf("Invalid input for person.\n");
+                    (void) printf("Invalid input for person.\n");
                 }
                 break;
 
             case 'R': case 'r': // Entfernen
                 if (read_person(&p)) {
                     if (remove_person(&p)) {
-                        printf("Person removed successfully.\n");
+                        (void) printf("Person removed successfully.\n");
                     } else {
-                        printf("Failed to remove person.\n");
+                        (void) printf("Failed to remove person.\n");
                     }
                 } else {
-                    printf("Invalid input for person.\n");
+                    (void) printf("Invalid input for person.\n");
                 }
                 break;
 
@@ -94,16 +94,16 @@ int main(int argc, char* argv[]) {
 
             case 'C': case 'c': // Liste leeren
                 clear_list();
-                printf("List cleared.\n");
+                (void) printf("List cleared.\n");
                 break;
 
             case 'Q': case 'q': // Beenden
                 clear_list();
-                printf("Exiting program.\n");
+                (void) printf("Exiting program.\n");
                 return EXIT_SUCCESS; // Programm beenden
 
             default:
-                printf("Invalid command. Please try again.\n");
+                (void) printf("Invalid command. Please try again.\n");
                 break;
         }
     }

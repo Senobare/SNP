@@ -39,7 +39,7 @@ bool is_duplicate(const person_t *p) {
  */
 bool insert_person(const person_t *p) {
     if (is_duplicate(p)) {
-        printf("Error: Person already exists\n");
+        (void)printf("Error: Person already exists\n");
         return false; // Person existiert bereits
     }
 
@@ -86,7 +86,7 @@ bool remove_person(const person_t *p) {
         prev = current;
         current = current->next;
     }
-    printf("Error: Person not found\n");
+    (void)printf("Error: Person not found\n");
     return false; // Person nicht gefunden
 }
 
@@ -114,7 +114,7 @@ void clear_list(void) {
 void show_list(void) {
     node_t *current = anchor.next;
     while (current != &anchor) { // Durchlaufe die Liste
-        printf("%s %s, %u\n", current->content.first_name, 
+        (void)printf("%s %s, %u\n", current->content.first_name, 
                current->content.name, current->content.age);
         current = current->next;
     }
