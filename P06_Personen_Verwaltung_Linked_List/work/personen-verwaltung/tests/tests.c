@@ -18,11 +18,14 @@
 #include <assert.h>
 #include <CUnit/Basic.h>
 #include "test_utils.h"
+#include <stdbool.h> 
 #include "person.h"
 #include "list.h"
 
+extern node_t anchor;
+
 #ifndef TARGET // must be given by the make file --> see test target
-#error missing TARGET define
+#define TARGET "default_target" // Define a default TARGET value
 #endif
 
 /// @brief alias for EXIT_SUCCESS

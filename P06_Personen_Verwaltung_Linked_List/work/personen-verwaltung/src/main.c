@@ -93,12 +93,12 @@ int main(int argc, char* argv[]) {
                 break;
 
             case 'C': case 'c': // Liste leeren
-                clear_list();
+                (void) clear_list();
                 (void) printf("List cleared.\n");
                 break;
 
             case 'Q': case 'q': // Beenden
-                clear_list();
+                (void) clear_list();
                 (void) printf("Exiting program.\n");
                 return EXIT_SUCCESS; // Programm beenden
 
