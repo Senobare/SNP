@@ -44,7 +44,7 @@ bool insert_person(const person_t *p) {
     }
 
     node_t *new_node = malloc(sizeof(node_t)); // Speicher für neuen Knoten anfordern
-    if (!new_node) return false; // Fehler bei der Speicherzuweisung
+    if (!new_node) return false; // Fehler bei der Speicherzuweisung. Achtung NULL könnte -1 sein und nicht 0
 
     memcpy(&new_node->content, p, sizeof(person_t)); // Person kopieren
 

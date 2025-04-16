@@ -61,8 +61,11 @@ int main(int argc, char* argv[]) {
 
     while (1) {
         (void) printf("\nI(nsert), R(emove), S(how), C(lear), Q(uit): ");
+        // test 1%c, wenn möglich nicht scanf verwenden
         scanf(" %c", &command); // Benutzereingabe einlesen
-
+        // Puffer leeren
+        do {} while (getchar() != '\n'); // Eingabepuffer leeren
+            
         switch (command) {
             case 'I': case 'i': // Einfügen
                 if (read_person(&p)) {
