@@ -1,51 +1,66 @@
 //***************************************************************************
-// File:             ProcA6.c
+// File:             ProcA5.c
 // Original Author:  M. Thaler (Modul BSY)
+// Beschreibung:     Demonstriert den Wechsel des Elternprozesses nach
+//                   Terminierung des ursprünglichen Elternprozesses.
+//                   Das Kindprozess zeigt per getppid() den Übergang zur
+//                   neuen Elternprozess-ID (normalerweise PID 1) und nutzt
+//                   system("ps") zur Darstellung.
 //***************************************************************************
 
 //***************************************************************************
-// system includes
+// System-Includes
 //***************************************************************************
 
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
+#include <sys/types.h>   // Datentypen wie pid_t
+#include <sys/wait.h>    // für wait()
+#include <unistd.h>      // fork(), getpid(), getppid(), sleep(), usleep()
+#include <stdio.h>       // printf(), perror(), sprintf()
+#include <errno.h>       // Fehlerbehandlung
+#include <stdlib.h>      // exit(), system()
 
 //***************************************************************************
-// Function: main(), parameter: none
+// Funktion: main() – Einstiegspunkt
 //***************************************************************************
 
 int main(void) {
+    pid_t pid, id; // Prozess-IDs für das Eltern- und Kindprozess
+    char buf[64]; // Puffer für den PS-Befehl
+    int i; // Schleifenzähler
 
-    pid_t  pid, id;
-    char   buf[64];
-    int    i;
+    pid = fork(); // Erzeuge ein Kindprozess
 
-    pid = fork();
     switch (pid) {
-      case -1:
-        perror("Could not fork");
-        break;
-      case 0:
-        printf("\n... ich bin das Kind %d\n", getpid());
-        for (i = 0; i < 10; i++) {
-            usleep(500000);                         // slow down a bit
-            printf("Mein Elternprozess ist %d\n", id = getppid());
-        }
-        printf("... so das wars\n");
-        break;
-      default:
-        sleep(2);                                   // terminate
-        exit(0);
-        break;
+        case -1: // Fehler beim Fork
+            perror("Could not fork");
+            break;
+
+        case 0: // Kindprozess
+            printf("\n... ich bin das Kind %d\n", getpid());
+
+        // Schleife mit Ausgaben der Elternprozess-ID
+            for (i = 0; i < 10; i++) {
+                usleep(500000); // 0.5 Sekunden warten
+                printf("Mein Elternprozess ist %d\n", id = getppid());
+            }
+
+            printf("... so das wars\n"); // Kindprozess beendet sich
+            break;
+
+        default: // Elternprozess
+            sleep(12); // schläft 12 Sekunden, damit Kind aktiv bleibt
+            exit(0); // beendet sich danach (Kind wird Waisenkind)
+            break;
     }
+
+    // Wird im Kindprozess nach dem Eltern-Tod ausgeführt
     printf("\n\n*** and here my new parent ****\n\n");
+
+    // ps-Befehl vorbereiten, um neuen Elternprozess per PID anzuzeigen
     sprintf(buf, "ps -p %d", id);
-    system(buf);
-    exit(0);
+    system(buf); // Befehl ausführen
+
+    exit(0); // Prozess beenden
 }
 
 //***************************************************************************

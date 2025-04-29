@@ -59,12 +59,11 @@ ___
 **Aufgaben**
 1. Studieren Sie zuerst das Programm `ProcA1.c` und beschrieben Sie was geschieht.
    ```
-      
-      
+      Das Programm erzeugt mit `fork()` einen Kindprozess, wodurch zwei Prozesse (Eltern und Kind) gleichzeitig weiterlaufen. Beide Prozesse verändern unabhängig voneinander eine gemeinsame Variable `i`, da jeder eine eigene Kopie besitzt. Anschließend geben sie Informationen über ihre Identität aus, und der Elternprozess wartet auf das Ende des Kindprozesses.
    ```
 2. Notieren Sie sich, was ausgegeben wird. Starten Sie das Programm und vergleichen Sie die Ausgabe mit ihren Notizen? Was ist gleich, was anders und wieso?
    ```
-      
+      Pid von den Eltern und Kind Prozess ändert sich immer jedoch die Reihenfolge bleibt gleich in der ausgabe und die Anpassung vom i Wert
       
    ```
    
@@ -80,18 +79,21 @@ ___
 1. Studieren Sie zuerst die Programme `ProcA2.c` und `ChildProcA2.c`.
 2. Starten Sie `ProcA2.e` und vergleichen Sie die Ausgabe mit der Ausgabe unter Aufgabe 1. Diskutieren und erklären Sie was gleich ist und was anders.
    ```
-      
-      
+   Das Forken in zwei Prozesse ist gleich – sowohl Eltern- als auch Kindprozess werden erzeugt.
+   Der Unterschied: Nach dem execl() im Kindprozess wird dessen Programmlogik durch das neue Programm ChildProcA2.e ersetzt.
+   Deshalb wird die Zeile „. . . . . und wer bin ich?“ nur vom Elternprozess ausgegeben – nicht vom Kindprozess, da execl() bei Erfolg nie zurückkehrt.
    ```
 3. Benennen Sie `ChildProcA2.e` auf `ChildProcA2.f` um (Shell Befehl `mv`) und überlegen Sie, was das Programm nun ausgibt. Starten Sie `ProcA2.e` und vergleichen Sie Ihre Überlegungen mit der Programmausgabe.
    ```
-      
-      
+   Da execl("./ChildProcA2.e", ...) nun eine nicht existierende Datei referenziert, schlägt der Aufruf fehl.
+   Das Programm gibt daraufhin im Kindprozess die perror()-Meldung aus: „execl not successful: No such file or directory“.
+   Im Gegensatz zu vorher gibt jetzt auch der Kindprozess wieder „. . . . . und wer bin ich?“ aus, da execl() fehlgeschlagen ist und der Code danach weiterläuft.
    ```
 4. Nennen Sie das Kindprogramm wieder `ChildProcA2.e` und geben Sie folgenden Befehl ein: `chmod -x ChildProcA2.e`. Starten Sie wiederum `ProcA2.e` und analysieren Sie die Ausgabe von `perror("...")`. Wieso verwenden wir `perror()`?
    ```
-      
-      
+   Da `ChildProcA2.e` jetzt **nicht mehr ausführbar** ist (fehlendes execute-Recht), schlägt `execl()` im Kindprozess fehl.
+   Die perror()-Ausgabe meldet: „execl not successful: Permission denied“.
+   Auch in diesem Fall läuft der Code nach execl() im Kindprozess weiter, weshalb dort ebenfalls die Zeile „. . . . . und wer bin ich?“ erscheint.
    ```
 
 ___
@@ -106,6 +108,24 @@ ___
 **Aufgaben**
 
 1. Studieren Sie zuerst Programm `ProcA3.c` und zeichnen Sie die entstehende Prozesshierarchie (Baum) von Hand auf. Starten Sie das Programm und verifizieren Sie ob Ihre Prozesshierarchie stimmt.
+```
+ProcA4.e (PID 1000)
+├── ProcA4.e (PID 1001)
+│   ├── ProcA4.e (PID 1003)
+│   │   ├── ProcA4.e (PID 1007)
+│   │   └── ProcA4.e (PID 1008)
+│   └── ProcA4.e (PID 1004)
+│       ├── ProcA4.e (PID 1009)
+│       └── ProcA4.e (PID 1010)
+├── ProcA4.e (PID 1002)
+│   ├── ProcA4.e (PID 1005)
+│   │   ├── ProcA4.e (PID 1011)
+│   │   └── ProcA4.e (PID 1012)
+│   └── ProcA4.e (PID 1006)
+│       ├── ProcA4.e (PID 1013)
+│       └── ProcA4.e (PID 1014)
+
+```
 2. Mit dem Befehl `ps f` oder `pstree` können Sie die Prozesshierarchie auf dem Bildschirm ausgeben. Damit die Ausgabe von `pstree` übersichtlich ist, müssen Sie in dem Fenster, wo Sie das Programm `ProcA3.e` starten, zuerst die PID der Shell erfragen, z.B. über `echo $$`. Wenn Sie nun den Befehl `pstree -n -p pid-von-oben` eingeben, wird nur die Prozesshierarchie ausgehend von der Bash Shell angezeigt: `-n` sortiert die Prozesse numerisch, `-p` zeigt für jeden Prozess die PID an.
 
 **Hinweis:** alle erzeugten Prozesse müssen arbeiten (d.h. nicht terminiert sein), damit die Darstellung gelingt. Wie wird das im gegebenen Programm erreicht?
@@ -123,8 +143,9 @@ ___
 
 1. Studieren Sie Programm `ProcA4.c.` Starten Sie nun mehrmals hintereinander das Programm `ProcA4.e` und vergleichen Sie die jeweiligen Outputs (leiten Sie dazu auch die Ausgabe auf verschiedene Dateien um). Was schliessen Sie aus dem Resultat?
    ```
-
-
+   Die Reihenfolge von "Child" und "Mother" ändert sich.
+   Dies liegt daran, dass nach dem Fork Eltern- und Kindprozess unabhängig voneinander arbeiten und das Betriebssystem dynamisch entscheidet, welcher Prozess zu welchem Zeitpunkt Rechenzeit erhält.
+   Obwohl beide Prozesse auf dieselbe CPU (CPU 0) gebunden sind, ist die genaue Reihenfolge der Ausgaben aufgrund der konkurrierenden Prozessausführung nicht deterministisch.
    ```
 **Anmerkung:** Der Funktionsaufruf `selectCPU(0)` erzwingt die Ausführung des Eltern- und Kindprozesses auf CPU 0 (siehe Modul `setCPU.c`). Die Prozedur `justWork(HARD_WORK)` simuliert CPU-Load durch den Prozess (siehe Modul `workerUtils.c`).
 
@@ -139,19 +160,24 @@ ___
 1. Analysieren Sie Programm `ProcA5.c`: was läuft ab und welche Ausgabe erwarten Sie?
 
    ```
-
-
+   Beim Start des Programms erzeugt fork() einen Kindprozess.
+   Dieser Kindprozess gibt seine eigene PID aus und wiederholt mehrfach (in einer Schleife) die PID seines Elternprozesses mit getppid().
+   Anfangs ist das wie erwartet der ursprüngliche Elternprozess (PID 51427).
+   Da der Elternprozess jedoch nach 2 Sekunden mit exit(0) terminiert, verliert das Kind seinen Elternprozess und wird von init bzw. launchd (PID 1) adoptiert.
+   Ab diesem Moment gibt getppid() den Wert 1 zurück.
+   Am Ende zeigt das Programm mittels ps -p <PID> den neuen Elternprozess an – in diesem Fall 1.
    ```
 2. Starten Sie `ProcA5.e`: der Elternprozess terminiert: was geschieht mit dem Kind?
 
    ```
-
-
+   Der Kindprozess läuft weiter, obwohl der Elternprozess sich beendet hat.
+   Der Beweis: getppid() gibt nach dem Tod des ursprünglichen Elternprozesses die neue Elternprozess-ID 1 zurück.
+   Das Kindprozess funktioniert weiterhin korrekt und beendet sich selbst nach dem Schleifendurchlauf.
    ```
 3. Was geschieht, wenn der Kindprozess vor dem Elternprozess terminiert? Ändern Sie dazu im `sleep()` Befehl die Zeit von 2 Sekunden auf 12 Sekunden und verfolgen Sie mit top das Verhalten der beiden Prozesse, speziell auch die Spalte S.
    ```
-
-
+   - Der Kindprozess terminiert normal.
+   - Der Elternprozess lebt noch weiter für einige Sekunden.
    ```
 ___
 
@@ -170,14 +196,13 @@ ___
     **Hinweis:** `<defunct>` = Zombie.
 3. Starten Sie `aaaa.e` und verfolgen Sie im `mtop`-Fenster was geschieht. Was beachten Sie?
    ```
-
-
+   Es gibt Prozesse welche defunct werden weil diese darauf warten das der Eltern Prozess die Werte abholt.
    ```
 
 4. In gewissen Fällen will man nicht auf die Terminierung eines Kindes mit `wait()`, bzw. `waitpid()` warten. Überlegen Sie sich, wie Sie in diesem Fall verhindern können, dass ein Kind zum Zombie wird.
    ```
-
-
+   Wenn ein Kindprozess stirbt, schickt das Betriebssystem ein SIGCHLD-Signal an den Elternprozess.
+   Wenn der Elternprozess aber SIGCHLD ignoriert, dann räumt das Betriebssystem den beendeten Kindprozess automatisch auf → kein Zombie entsteht.
    ```
 
 ___
@@ -188,6 +213,8 @@ ___
 
 Sie können diese Aufgabe bis dann aufsparen oder die verwendeten Funktionen selber via `man` Pages im benötigten Umfang kennenlernen: `man 2 kill` und `man 7 signal`.
 
+**Es fehlt ein Import in ProcA7.c für kill**
+
 **Ziele**
 * Verstehen, wie Informationen zu Kindprozessen abgefragt werden können.
 * Die Befehle `wait()` und `waitpid()` verwenden können.
@@ -195,12 +222,18 @@ Sie können diese Aufgabe bis dann aufsparen oder die verwendeten Funktionen sel
 **Aufgaben**
 1. Starten Sie das Programm `ProcA7.e` und analysieren Sie wie die Ausgabe im Hauptprogramm zustande kommt und was im Kindprozess `ChildProcA7.c` abläuft.
    ```
-
-
+   Beim Start von ProcA7.e wird ein Kindprozess mit fork() erzeugt.
+   Dieser Kindprozess ersetzt sich selbst durch das Programm ChildProcA7.e. Dabei wird ihm ein Argument (`whatToDo`) übergeben, das sein Verhalten steuert.
+   Das Hauptprogramm (`ProcA7.e`) wartet anschließend auf die Terminierung des Kindprozesses mit `wait()` oder `waitpid()`.
+   Die Ausgabe im Hauptprogramm entsteht durch die Auswertung des Rückgabewerts von `wait()`:
+      - Wurde das Kind normal beendet, wird `WIFEXITED(status)` true und der Exit-Code mit `WEXITSTATUS(status)` angezeigt.
+      - Wurde das Kind durch ein Signal beendet, wird `WIFSIGNALED(status)` true und das Signal mit `WTERMSIG(status)` ausgegeben, ggf. ergänzt durch `WCOREDUMP(status)`.
+   Das Kindprogramm ChildProcA7.e verarbeitet den übergebenen Wert und entscheidet anhand eines `switch(i)`-Blocks, wie es endet:
+      - durch `exit(0)`, `kill()`, `Segmentation Fault` oder `sleep()` + `exit()`.
    ```
 2. Starten Sie `ProcA7.e` und danach nochmals mit `1` als erstem Argument. Dieser Argument Wert bewirkt, dass im Kindprozess ein ”Segmentation Error” erzeugt wird, also eine Speicherzugriffsverletzung. Welches Signal wird durch die Zugriffsverletzung an das Kind geschickt? Diese Information finden Sie im Manual mit `man 7 signal`.
    ```
-
+   Es wird 11 returniert
 
 
    ```
@@ -216,23 +249,22 @@ Damit sie den Ort des Absturzes sehen. Mit `quit` verlassen Sie **gdb** wieder.
 Dokumentieren Sie hier Ihre Beobachtungen zu `ProcA7.e 1`:
    ```
 
-
    ```
 
 3. Wenn Sie `ProcA7.e 2` starten, sendet das Kind das Signal 30 an sich selbst. Was geschieht?
    ```
-
-
+   Prozess sendet sich selbst das Signal 30 (Benutzerdefiniertes Signal) und killt sich
    ```
 4. Wenn Sie `ProcA7.e 3` starten, sendet ProcA7.e das Signal SIGABRT (abort) an das Kind: was geschieht in diesem Fall?
    ```
-
-
+   Prozess schläft 5 Sekunden, wartet auf ein Signal
+   Exists on signal 6
    ```
 5. Mit `ProcA7.e 4` wird das Kind gestartet und terminiert nach 5 Sekunden. Analysieren Sie wie in ProcA7.e der Lauf- bzw. Exit-Zustand des Kindes abgefragt wird (siehe dazu auch `man 3 exit`).
    ```
-
-
+   Der Elternprozess überprüft mit `waitpid(..., WNOHANG)` regelmäßig, ob das Kind beendet ist. Sobald das der Fall ist, wird der Exit-Code mit `WEXITSTATUS(status)` ausgelesen und ausgegeben.
+   Der Exit-Code 222 stammt direkt aus dem Aufruf `exit(222)` im Kindprozess.
+   Laut `man 3 exit` wird der `status`-Wert aus `exit()` an den Elternprozess übergeben und kann dort mit `WEXITSTATUS()` ausgelesen werden.
    ```
 ___
 
@@ -247,23 +279,42 @@ ___
    * Starten Sie `ProcA8_1.e `und überprüfen Sie Ihre Überlegungen.
    * Waren Ihre Überlegungen richtig? Falls nicht, was könnten Sie falsch überlegt haben?
    ```
+   Hallo, I am on the way to fork now, ......look: I am the parent
+   ok: I am the child
+   clear ?
+   clear ?
 
-
-   ```
+   Habe ich erwartet jedoch war dies ausgabe: 
+   Hallo, I am on the way to fork now, ......look: I am the parent
+   clear ?
+   Hallo, I am on the way to fork now, ......look: I am the child
+   clear ?
+   
+   Dies passierte weil:
+   - Die Startnachricht ("Hallo, I am on the way to fork now, ......lo") wird nur einmal vor dem fork geschrieben und ist deshalb Teil beider Prozesse.
+   - Nach dem fork arbeiten Eltern und Kind getrennt und geben ihre jeweiligen Nachrichten ("ok: I am the parent" bzw. "ok: I am the child") unabhängig aus.
+   - Die Ausgaben erscheinen hintereinander, weil Prozesse vom Betriebssystem nacheinander Zeit auf der CPU erhalten (Scheduling).
+   
+      ```
 2. Analysieren Sie Programm `ProcA8_2.c`: was gibt das Programm aus?
    * Starten Sie `ProcA8_2.e` und überprüfen Sie Ihre Überlegungen.
    * Waren Ihre Überlegungen richtig? Falls nicht, was könnten Sie falsch gemacht haben?
    * Kind und Eltern werden in verschiedener Reihenfolge ausgeführt: ist ein Unterschied ausser der Reihenfolge festzustellen?
    ```
-
-
+   Nein, außer der Reihenfolge der Ausgaben gibt es **keine inhaltlichen Unterschiede**.
+   Grund:
+   - Jeder Prozess bearbeitet nur seine eigene lokale Kopie des Arrays.
+   - Der Inhalt ist unabhängig davon, wer zuerst schreibt.
+   - Fork trennt die Adressräume: nach dem Fork beeinflussen sich Eltern- und Kindprozess nicht mehr gegenseitig.
    ```
 3. Analysieren Sie Programm `ProcA8_3.c` und Überlegen Sie, was in die Datei `AnyOutPut.txt` geschrieben wird, wer schreibt alles in diese Datei (sie wird ja vor `fork()` geöffnet) und wieso ist das so?
    * Starten Sie `ProcA8_3.e` und überprüfen Sie Ihre Überlegungen.
    * Waren Ihre Überlegungen richtig? Falls nicht, wieso nicht?
    ```
-
-
+   Ja, die Überlegungen waren korrekt:
+   Beide Prozesse schreiben in dieselbe Datei.
+   Die Reihenfolge der Zeilen ist unvorhersehbar und wechselt je nach Lauf.
+   fflush(fdes) sorgt dafür, dass die Daten schnell in die Datei geschrieben werden und nicht im Speicherpuffer hängen bleiben.
    ```
 
 ___
@@ -280,20 +331,28 @@ ___
    * Starten Sie `ProcA9.e` und vergleichen das Resultat mit Ihren Überlegungen.
    * Was ist anders als bei `ProcA8_2.e`?
 ```
+In `ProcA8_2.e` (mit Prozessen) arbeiteten Eltern- und Kindprozess unabhängig auf **getrennten Kopien** des Arrays.
 
+In `ProcA9.c` (mit Threads) arbeiten beide Threads **gleichzeitig** auf **demselben Array**.
 
+Deshalb:
+- Gibt es bei `ProcA9.c` potenzielle Überschneidungen und Nebeneffekte während der laufenden Ausgaben.
+- Bei `ProcA8_2.e` war jede Prozessausgabe sauber isoliert, weil Speicherbereiche nicht geteilt wurden.
+
+Kurz gesagt:
+- **Threads teilen Speicher** → Möglichkeit von Überlappungen während des Druckens.
+- **Prozesse haben getrennten Speicher** → keine Überschneidungen möglich.
 ```
 
 
 2. Setzen Sie in der Thread-Routine vor dem Befehl `pthread_exit()` eine unendliche Schleife ein, z.B. `while(1) { }`; .
    * Starten Sie das Programm und beobachten Sie das Verhalten mit `top`. Was beobachten Sie und was schliessen Sie daraus?
-
         **Hinweis:** wenn Sie in `top` den Buchstaben H eingeben, werden die Threads einzeln dargestellt.
    * Kommentieren Sie im Hauptprogram die beiden `pthread_join()` Aufrufe aus und starten Sie das Programm. Was geschieht? Erklären Sie das Verhalten.
 
 ```
-
-
+Mit pthread_join() und Endlosschleife: Hauptprozess bleibt hängen, wartet ewig.
+Ohne pthread_join(), Endlosschleife: Hauptprozess beendet sich sofort und beendet alle Threads.
 ```
 
 
