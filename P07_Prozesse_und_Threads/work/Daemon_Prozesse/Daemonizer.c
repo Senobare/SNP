@@ -2,6 +2,13 @@
 * File:            Daemonizer.c
 * Original Autor:  M. Thaler (Modul BSY)
 * Aufgabe:         Einen Daemon-Prozess erzeugen
+*
+* Beschreibung:
+* Diese Datei enthält die zentrale Funktion `Daemonizer()`, mit der ein
+* Prozess sich korrekt in einen Daemon umwandelt:
+* - Abtrennung vom Terminal (double-fork, setsid, signal handling)
+* - Erstellung eines Lockfiles zur Vermeidung von Mehrfachstarts
+* - Umleitung von stdout/stderr auf eine Logdatei (optional)
 ******************************************************************************/
 
 #include <sys/types.h>
@@ -15,128 +22,111 @@
 #include <errno.h>
 
 //*****************************************************************************
-
-// Macro to write out all the PIDs...
-
-#define OutPutPIDs()  /*printf("\nPID %d, PPID %d, GRP-ID %d\n", \
-                             getpid(), getppid(), getpgrp())*/
-                                
-
-//*****************************************************************************
-// Function:    Locks file with file descriptor fd
-// Returns:     0 on success, -1 of file is already locked
-// Exits:       on fatal errors
+// Hilfsmakro für Debug-Zwecke (derzeit deaktiviert)
+#define OutPutPIDs() printf("\nPID %d, PPID %d, GRP-ID %d\n", getpid(), getppid(), getpgrp())
 //*****************************************************************************
 
+//*****************************************************************************
+// Funktion:    lock()
+// Aufgabe:     Sperrt eine Datei exklusiv über fcntl() (schreibend)
+// Parameter:   fd – Datei-Deskriptor des Lockfiles
+// Rückgabe:    0 bei Erfolg, -1 wenn Datei bereits gesperrt (Daemon läuft)
+//              Bei fatalen Fehlern: Programmabbruch
+//*****************************************************************************
 int lock(int fd) {
-    int     retval, len;
-    struct  flock lock;        // data structure for file lock
-    char    buffer[16];
+    int retval, len;
+    struct flock lock;
+    char buffer[16];
 
-    // prepare lockfile
-
+    // Lockstruktur konfigurieren: schreibender Lock über gesamte Datei
     lock.l_type   = F_WRLCK;
     lock.l_start  = 0;
     lock.l_whence = SEEK_SET;
     lock.l_len    = 0;
 
-    retval = fcntl(fd, F_SETLK, &lock);     // set file lock
+    retval = fcntl(fd, F_SETLK, &lock);
     if (retval < 0) {
         if ((errno == EACCES) || (errno == EAGAIN)) {
-            return(-1);                     // Daemon already runs
-        }
-        else {
+            return -1; // Datei ist bereits gesperrt → Daemon läuft
+        } else {
             perror("fatal error when locking file");
             exit(-1);
         }
     }
 
-    // empty the lockfile
-
-    retval = ftruncate(fd, 0);
-    if (retval < 0) {
+    // Lockfile leeren
+    if (ftruncate(fd, 0) < 0) {
         perror("fatal error when emptying lockfile");
         exit(-1);
     }
-    
-    // write process ID to lockfile
 
+    // PID in Lockfile schreiben
     sprintf(buffer, "%d\n", getpid());
     len = strlen(buffer);
-    retval = write(fd, buffer, len) < len;
-    if (retval < 0) {
+    if (write(fd, buffer, len) < len) {
         perror("fatal error when writing pid to lockfile");
         exit(-1);
     }
 
-    // set lockfile to close on exec
-
+    // Lockfile beim exec automatisch schließen
     retval = fcntl(fd, F_GETFD, 0);
     if (retval < 0) {
         perror("fatal error when reading lockfile flags");
         exit(-1);
     }
-    retval = retval | FD_CLOEXEC;
-    retval = fcntl(fd, F_SETFD, retval);
-    if (retval < 0) { 
+    retval |= FD_CLOEXEC;
+    if (fcntl(fd, F_SETFD, retval) < 0) {
         perror("fatal error when setting lockfile flags");
         exit(-1);
     }
-    return(0);
+
+    return 0;
 }
 
 //*****************************************************************************
-// Function:    Makes a deamon process and runs a daemon function
-// Parameter:   Daemon function
-//              data pointer to data to be passed to Daemonfunction
-//              LogFile, path of logfile, if NULL, no logfile is created
-//              LivDir, path, where daemon will live
-// Returns:     should not return
-// Exits:       if daemon is already runnung or on fatal errors
+// Funktion:    Daemonizer()
+// Aufgabe:     Wandelt den aktuellen Prozess in einen Daemon um und
+//              startet die übergebene Daemon-Funktion
+//
+// Parameter:
+//   - Daemon(): Funktionszeiger auf die Hauptfunktion des Daemons
+//   - data: beliebige Nutzdaten (üblicherweise Konfiguration oder Name)
+//   - LockFile: Pfad zur Lockdatei zur Mehrfachstartvermeidung (NULL = keine)
+//   - LogFile: Pfad zur Logdatei (NULL = keine Ausgabeumleitung)
+//   - LivDir: Arbeitsverzeichnis des Daemons
+//
+// Rückgabe:    Sollte nie zurückkehren (außer bei Fehlern)
 //*****************************************************************************
-
-int Daemonizer(void Daemon(void *), void *data, 
+int Daemonizer(void Daemon(void *), void *data,
                const char *LockFile, const char *LogFile, const char *LivDir) {
 
-    pid_t  PID;
-    int    fd, dummyfd, retval;
-    
-    //    create a prozess and terminate parents -> parent is init
+    pid_t PID;
+    int fd, dummyfd, retval;
 
-    OutPutPIDs();
+    OutPutPIDs();  // optionaler Debug-Ausdruck
 
+    // ========== 1. fork() zum Abtrennen vom Elternprozess ==========
     PID = fork();
     if (PID < 0) {
         perror("could not fork()");
         exit(-1);
+    } else if (PID > 0) {
+        exit(0);  // Elternprozess beendet sich sofort
     }
-    else if (PID > 0) {
-        exit(0);                // I have done my work an can exit
-    }
-    
-    // ----------------------------------------------------------------------
-    // now I am a process detached from the parent 
-    // an make the process -> a daemon process
 
-    signal(SIGINT, SIG_IGN);    // ignore CTRL-C
-    signal(SIGQUIT, SIG_IGN);   // ignore quit
-    signal(SIGHUP, SIG_IGN);    // ignore hangup of terminal
+    // ========== 2. Kindprozess: eigentlicher Daemon ==========
+    // Signale ignorieren, da Terminalbindung entfällt
+    signal(SIGINT,  SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGHUP,  SIG_IGN);
 
-    OutPutPIDs();
+    setsid();           // Neue Session + Gruppenführer → vollständige Trennung vom Terminal
+    chdir(LivDir);      // Wechsle ins Arbeitsverzeichnis
+    umask(0);           // Dateiberechtigungen nicht einschränken
 
-    setsid();                   // make process session leader
-                                // and processgroup leader
-                                // no control terminal with pocess
-    OutPutPIDs();
-
-    chdir(LivDir);              // change to secure directory
-    umask(0);                   // allow all access rights for files
-
-    // set up lockfile, if required
-
+    // ========== 3. Lockfile prüfen ==========
     if (LockFile != NULL) {
-        fd = open(LockFile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR |
-                  S_IRGRP | S_IROTH);
+        fd = open(LockFile, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         if (fd < 0) {
             perror("fatal error when opening lockfile");
             exit(-1);
@@ -144,35 +134,31 @@ int Daemonizer(void Daemon(void *), void *data,
         retval = lock(fd);
         if (retval < 0) {
             printf("\n*** daemon is already running ***\n");
-            exit(0);
+            exit(0);  // Normal beenden, kein Fehler
         }
     }
 
-    // last message from daemon
+    printf("\n*** daemon starts with process id: %d ***\n", getpid());
 
-    printf("\n*** daemon starts with process id: %d ***\n",getpid());
+    // ========== 4. Umleitung von stdout/stderr auf Logdatei (optional) ==========
+    close(1);  // stdout schließen
+    close(2);  // stderr schließen
 
-    // close "communication" to outer world and set up logging, if required
-
-    close(1);               // close stdout
-    close(2);               // close stderr
-    if (LogFile != NULL) {  // open log file on stdout 
-        enum {UserWrite=0644};
-        dummyfd = open(LogFile, O_CREAT | O_APPEND | O_WRONLY,UserWrite);
+    if (LogFile != NULL) {
+        enum {UserWrite = 0644};
+        dummyfd = open(LogFile, O_CREAT | O_APPEND | O_WRONLY, UserWrite);
         if (dummyfd < 0) {
             perror("could not open log file");
             exit(-1);
         }
-        dup(1);             // connect stderr to logfile
-    }  
-    close(0);               // now close stdin
+        dup(1);  // stderr wird auf dasselbe wie stdout gesetzt (beide in Logfile)
+    }
 
-    //    now start the daemon funktion
+    close(0);  // stdin schließen
+
+    // ========== 5. Starte die übergebene Daemon-Funktion ==========
     Daemon(data);
 
-    // should not come here
-
-    return(0);
+    // Sollte nie erreicht werden
+    return 0;
 }
-
-//*****************************************************************************

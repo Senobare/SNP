@@ -358,7 +358,7 @@ Ohne pthread_join(), Endlosschleife: Hauptprozess beendet sich sofort und beende
 
 ___
 
-### 3.10 Aufgabe 10 (optional):
+### 3.10 Aufgabe 10:
 
 #### 3.10.1 Übersicht
 Dieser Teil des Praktikums behandelt spezielle Prozesse: die Dämon Prozesse («daemon pro-cesses»). Es ist gedacht als Zusatz zum Basis Praktikum über Prozesse und Threads.
@@ -401,24 +401,25 @@ Im Abschnitt 4 finden Sie Zusatzinformationen über diese Implementation eines D
 
 1. Für die folgende Aufgabe benötigen Sie mindestens zwei Fenster (Kommandozeilen-Konsolen). Übersetzen Sie die Programme mit `make` und starten Sie das Programm **PlapperMaul** in einem der Fenster. Das Programm schreibt (ca.) alle 0.5 Sekunden *Hallo, ich bins.... Pidi* plus seine Prozess-ID auf den Bildschirm. Mit dem Shell Befehl `ps` können Sie Ihre aktiven Prozesse auflisten, auch **PlapperMaul**. Überlegen Sie sich zuerst, was mit **PlapperMaul** geschieht, wenn Sie das Fenster schliessen: läuft **PlapperMaul** weiter? Was geschieht mit **PlapperMaul** wenn Sie sich ausloggen und wieder einloggen? Testen Sie Ihre Überlegungen, in dem Sie die entsprechenden Aktionen durchführen. Stimmen Ihre Überlegungen?
    ```
-
-
+   Nein Plappermaul läuft nicht weiter wenn ich die Kommandozeile schliesse
+   Das Logout schliesst auch Plappermaul
    ```
 
 2. Starten Sie nun das Programm bzw. den Daemon **MrTimeDaemon**. Stellen Sie die gleichen Überlegungen an wie mit **PlapperMaul** und testen Sie wiederum, ob Ihre Überlegungen stimmen. Ob **MrTimeDaemon** noch läuft können Sie feststellen, indem Sie die Zeit abfragen oder den Befehl `ps ajx | grep MrTimeDaemon` eingeben: was fällt Ihnen am Output auf? Was schliessen Sie aus Ihren Beobachtungen?
    ```
-
+   Hier wird der Prozess von der Kommandozeile getrennt und läuft auch nach schliessen im Hintergrund weiter.
+   Bleibt auch bei logout weiter am laufen.
 
    ```
 
 3. Starten Sie **MrTimeDaemon** erneut, was geschieht?
    ```
-
+   Der Daemon startet nicht erneut, wenn er bereits läuft, da beim Start ein Lockfile (/tmp/timeDaemon.lock) überprüft oder geschrieben wird. Dieses Lockfile dient als Mechanismus zur Mehrfachstartvermeidung
 
    ```
 
-4. Stoppen Sie nun **MrTimeDaemon** mit `killall MrTimeDaemon`.
-5. Starten Sie **MrTimeDaemon** und fragen Sie mit `WhatsTheTimeMr localhost` oder mit `WhatsTheTimeMr 127.0.0.1` die aktuelle Zeit auf Ihrem Rechner ab.
+4. Stoppen Sie nun **MrTimeDaemon** mit `killall MrTimeDaemon`. (Oder via kill <process-id>)
+5. Starten Sie **MrTimeDaemon** und fragen Sie mit `./WhatsTheTimeMr.e localhost` oder mit `./WhatsTheTimeMr.e 127.0.0.1` die aktuelle Zeit auf Ihrem Rechner ab.
 
 
    **Optional:**
@@ -438,7 +439,7 @@ Im Abschnitt 4 finden Sie Zusatzinformationen über diese Implementation eines D
 
 6. Studieren Sie `MrTimeDaemon.c`, `Daemonizer.c` und `TimeDaemon.c` und analysieren Sie, wie die Daemonisierung abläuft. Entfernen Sie die Kommentare im Macro `Out-PutPIDs` am Anfang des Moduls `Daemonizer.c`. Übersetzen Sie die Programme mit make und starten Sie `MrTimeDaemon` erneut. Analysieren Sie die Ausgabe, was fällt Ihnen auf? Notieren Sie alle für die vollständige Daemonisierung notwendigen Schritte.
    ```
-
+   Bei mir hat sich in der Ausgabe nicht geändert. Sollte aber den ganzen prozess schritt für schritt anzeigen.
 
    ```
 
@@ -446,7 +447,7 @@ Im Abschnitt 4 finden Sie Zusatzinformationen über diese Implementation eines D
 
     **Hinweis:** lesen Sie das log-File: `/tmp/timeDaemon.log.`
    ```
-
+   Ohne Lockfile gibt es keinen Schutz vor Mehrfachstart.
 
    ```
 
