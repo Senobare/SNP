@@ -39,6 +39,9 @@ int main(void) {
     cD.selCount2 = 0;   
     pthread_mutex_init(&(cD.lock), NULL);
 
+    sem_init(&(cD.semCoffeeReady), 0, 1);  // Initially ready
+    sem_init(&(cD.semCoinInserted), 0, 0); // No coins initially
+
     // start teller and customers now that everything is set up    
     pthr = pthread_create(&tellerThread, NULL, coffeeTeller, &cD);
     assert(pthr == 0);    

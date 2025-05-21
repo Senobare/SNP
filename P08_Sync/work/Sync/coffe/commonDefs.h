@@ -1,3 +1,5 @@
+#include <semaphore.h>
+
 #ifndef MY_DEFINITIONS_HEADER
 #define MY_DEFINITIONS_HEADER
 
@@ -14,7 +16,11 @@
 
 //******************************************************************************
 
-#define CUSTOMERS   4   // number of customers to be started
+#define CUSTOMERS   10   // number of customers to be started
+
+//******************************************************************************
+
+#define NUM_COINS 3  // Coins required per coffee
 
 //******************************************************************************
 // common data 
@@ -24,6 +30,8 @@ typedef struct {
     int selCount1;              // number of chosen coffees of type 1
     int selCount2;              // number of chosen coffees of type 2
     pthread_mutex_t lock;       // common lock
+    sem_t semCoffeeReady;       // Teller -> Customer
+    sem_t semCoinInserted;      // Customer -> Teller
 } cData;
 
 //******************************************************************************
